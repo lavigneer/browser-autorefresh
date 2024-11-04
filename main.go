@@ -4,7 +4,6 @@
 package autorefresh
 
 import (
-	_ "embed"
 	"errors"
 	"html/template"
 	"net/http"
@@ -13,8 +12,29 @@ import (
 	"github.com/coder/websocket"
 )
 
-//go:embed "reload.go.html"
-var Script string
+const Script string = `
+<script>
+	function setupReloadSocket(reload = false) {
+		const reloadWebsocket = new WebSocket({{ path }});
+		let doReloadNext = reload;
+		reloadWebsocket.onopen = function () {
+			if (reload === true) {
+				window.location.reload();
+			} else {
+				doReloadNext = true;
+			}
+		};
+		reloadWebsocket.onerror = function onError() {
+			setTimeout(() => setupReloadSocket(doReloadNext), {{ refreshRate }});
+		};
+		reloadWebsocket.onclose = function onClose() {
+			setTimeout(() => setupReloadSocket(doReloadNext), {{ refreshRate }});
+		};
+	}
+	setupReloadSocket();
+</script>
+
+`
 
 type PageReloader struct {
 	Template    *template.Template

@@ -1,0 +1,11 @@
+linters:
+  presets:
+    - bugs
+    - comment
+    - complexity
+    - error
+    - metalinter
+    - performance
+    - sql
+    - test
+    - unused
