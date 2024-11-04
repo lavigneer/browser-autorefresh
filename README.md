@@ -5,7 +5,9 @@ This is a small Golang utility that can be installed as part of a web server tha
 
 # Installation
 
+```bash
 go get github.com/lavigneer/browser-autorefresh
+```
 
 # Example
 
