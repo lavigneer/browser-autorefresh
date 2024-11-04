@@ -1,0 +1,21 @@
+<script>
+	function setupReloadSocket(reload = false) {
+		const reloadWebsocket = new WebSocket({{ path }});
+		let doReloadNext = reload;
+		reloadWebsocket.onopen = function () {
+			if (reload === true) {
+				window.location.reload();
+			} else {
+				doReloadNext = true;
+			}
+		};
+		reloadWebsocket.onerror = function onError() {
+			setTimeout(() => setupReloadSocket(doReloadNext), {{ refreshRate }});
+		};
+		reloadWebsocket.onclose = function onClose() {
+			setTimeout(() => setupReloadSocket(doReloadNext), {{ refreshRate }});
+		};
+	}
+
+	setupReloadSocket();
+</script>
