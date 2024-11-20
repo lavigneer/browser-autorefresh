@@ -10,7 +10,7 @@ There are two components this utility provides:
 
 When the websocket connection is lost, a retry on the client-side occurs until it is able to reconnect, at which point it reloads the page to pull in the latest changes.
 
-This is most useful when combined with a server live reload tool (e.g., (air)[https://github.com/air-verse/air]).
+This is most useful when combined with a server live reload tool (e.g., [air](https://github.com/air-verse/air)).
 
 # Installation
 
