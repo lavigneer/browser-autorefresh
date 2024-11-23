@@ -5,6 +5,7 @@ package autorefresh
 
 import (
 	"errors"
+	"fmt"
 	"html/template"
 	"net/http"
 	"time"
@@ -42,22 +43,27 @@ type PageReloader struct {
 	RefreshRate uint
 }
 
+var (
+	ErrInvalidParameters = errors.New("Invalid parameters")
+	ErrTemplateParsing   = errors.New("Failed to parse template")
+)
+
 func New(t *template.Template, path string, refreshRate uint) (*PageReloader, error) {
 	// If there was no template passed, create our own and let it get used in some other way
 	if t == nil {
 		t = template.New("autorefresh")
 	}
 	if refreshRate < 100 {
-		return nil, errors.New("refreshRate must be at least 100ms")
+		return nil, fmt.Errorf("%w: refreshRate must be at least 100ms", ErrInvalidParameters)
 	}
 	t, err := t.Funcs(template.FuncMap{
 		"path":        func() string { return path },
 		"refreshRate": func() uint { return refreshRate },
 	}).Parse(Script)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", ErrTemplateParsing, err)
 	}
-	return &PageReloader{Path: path, Template: t}, nil
+	return &PageReloader{Path: path, Template: t, RefreshRate: refreshRate}, nil
 }
 
 func (p *PageReloader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +77,7 @@ func (p *PageReloader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	socketCtx := socket.CloseRead(ctx)
 	for {
-		socket.Ping(socketCtx)
+		_ = socket.Ping(socketCtx)
 		time.Sleep(time.Second * 2)
 	}
 }

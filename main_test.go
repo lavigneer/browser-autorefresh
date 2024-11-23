@@ -11,11 +11,18 @@ import (
 )
 
 func TestTemplate(t *testing.T) {
+	t.Parallel()
 	testTemplate := template.New("main")
 
-	autorefresh.New(testTemplate, "__test_path__", 250)
+	_, err := autorefresh.New(testTemplate, "__test_path__", 250)
+	if err != nil {
+		t.Fatalf("Could not create template. %v", err)
+	}
 	var b bytes.Buffer
-	testTemplate.Execute(&b, nil)
+	err = testTemplate.Execute(&b, nil)
+	if err != nil {
+		t.Fatalf("Could not render template. %v", err)
+	}
 	if !strings.Contains(b.String(), "new WebSocket(\"__test_path__\")") {
 		t.Fatalf("Did not insert path correctly for the websocket. Rendered %s", b.String())
 	}
